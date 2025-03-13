@@ -23,7 +23,7 @@ users_collection = db['users']
 keys_collection = db['keys']
 
 # Owner ID
-OWNER_ID = 123456789  # Replace with your Telegram user ID
+OWNER_ID = 7593550190  # Replace with your Telegram user ID
 
 # Global variables
 checking_active = False
