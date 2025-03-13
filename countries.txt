@@ -1,0 +1,20 @@
+USA|United States|🇺🇸
+THA|Thailand|🇹🇭
+IND|India|🇮🇳
+GBR|United Kingdom|🇬🇧
+CAN|Canada|🇨🇦
+AUS|Australia|🇦🇺
+FRA|France|🇫🇷
+DEU|Germany|🇩🇪
+JPN|Japan|🇯🇵
+CHN|China|🇨🇳
+BRA|Brazil|🇧🇷
+ZAF|South Africa|🇿🇦
+RUS|Russia|🇷🇺
+ITA|Italy|🇮🇹
+ESP|Spain|🇪🇸
+KOR|South Korea|🇰🇷
+MEX|Mexico|🇲🇽
+NLD|Netherlands|🇳🇱
+SWE|Sweden|🇸🇪
+CHE|Switzerland|🇨🇭
