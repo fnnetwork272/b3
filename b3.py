@@ -536,7 +536,7 @@ async def button(update: Update, context):
 # Main function to start the bot
 async def main():
     try:
-        application = Application.builder().token('YOUR_BOT_TOKEN').build()  # Replace with your Telegram Bot Token
+        application = Application.builder().token('7620898782:AAFpTD0KXDqE9hYjObM9WEwGLDOtfHFo3C0').build()  # Replace with your Telegram Bot Token
         
         application.add_handler(CommandHandler('start', start))
         application.add_handler(CommandHandler('stop', stop))
