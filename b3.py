@@ -698,7 +698,7 @@ async def button(update: Update, context):
 # Main function to start the bot
 async def main():
     try:
-        application = Application.builder().token('8122009466:AAFb7ZHkZR7UsVvQVwRIL4PPLWg0YwdSPvw').build()
+        application = Application.builder().token('7620898782:AAFviKp-DMP0QhhmvOlcRlYgSVu0ABMe18Q').build()
         
         application.add_handler(CommandHandler('start', start))
         application.add_handler(CommandHandler('genkey', genkey))
