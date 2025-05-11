@@ -399,7 +399,7 @@ def button(update, context):
 
 # Main function to start the bot
 def main():
-    updater = Updater('YOUR_BOT_TOKEN', use_context=True)  # Replace with your Telegram Bot Token
+    updater = Updater('7620898782:AAFpTD0KXDqE9hYjObM9WEwGLDOtfHFo3C0', use_context=True)  # Replace with your Telegram Bot Token
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('chk', chk))
