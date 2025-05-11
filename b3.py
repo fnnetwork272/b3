@@ -25,7 +25,7 @@ nest_asyncio.apply()
 # Configuration
 BATCH_DELAY = 30  # Seconds to wait between batches (reduced from 60)
 CHUNK_SIZE = 3    # Number of cards to check concurrently
-USE_PROXIES = True  # Set to False to bypass proxies for faster checks
+USE_PROXIES = False  # Set to False to bypass proxies for faster checks
 
 # User data to manage multiple users' checking processes
 user_data = {}
