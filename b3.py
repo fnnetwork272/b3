@@ -129,7 +129,7 @@ async def check_cc(cc, mes, ano, cvv, proxy=None):
     headers = {'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36'}
     
     async with GLOBAL_SEMAPHORE:
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=20)) as session:  # Reduced timeout to 20s
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=40)) as session:  # Reduced timeout to 20s
             proxy_url = proxy if proxy and USE_PROXIES else None
             proxy_status = "None" if not proxy_url else None
             try:
