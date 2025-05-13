@@ -941,7 +941,7 @@ async def main():
 
 if __name__ == '__main__':
     try:
-        loop =мс asyncio.get_event_loop()
+        loop = asyncio.get_event_loop()
         if loop.is_running():
             logger.warning("Event loop is already running, using nest_asyncio.")
             loop.create_task(main())
