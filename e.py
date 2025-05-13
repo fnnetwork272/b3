@@ -13,5 +13,5 @@ async def test_proxy(proxy):
         print(f"Proxy {proxy} failed: {str(e)}")
         return False
 
-proxy = "http://zgjifncy:lclg2hmhbjav@38.153.152.244:9594"  # Replace with one of your proxies
+proxy = "http://slrnujin-rotate:gp3pn6aymeka@p.webshare.io:80"  # Replace with one of your proxies
 asyncio.run(test_proxy(proxy))
