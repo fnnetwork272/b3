@@ -27,7 +27,7 @@ nest_asyncio.apply()
 # Configuration
 BATCH_DELAY = 30  # Seconds to wait between batches
 CHUNK_SIZE = 5    # Number of cards to check concurrently
-USE_PROXIES = True  # Set to False to bypass proxies for faster single checks
+USE_PROXIES = False  # Set to False to bypass proxies for faster single checks
 MONGO_URL = "mongodb+srv://ElectraOp:BGMI272@cluster0.1jmwb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"  # Replace with your MongoDB URL
 OWNER_ID = 7593550190  # Replace with your Telegram user ID
 COOLDOWN_MINUTES = 5  # Cooldown period after a check
