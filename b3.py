@@ -309,7 +309,7 @@ async def single_check(user_id, cc_details, update, context):
     issuer = result['issuer']
     # Combine the full country name with the flag
     country_display = f"{result['country_name']} {result['country_flag']}" if result['country_flag'] else result['country_name']
-    checked_by = f'<a href="tg://user?id={user_id}">{user.first_name}</a>'"
+    checked_by = f'<a href="tg://user?id={user_id}">{user.first_name}</a>'
     tier = user['tier'] if user else "None"
 
     if result['status'] == 'approved':
