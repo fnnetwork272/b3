@@ -49,7 +49,7 @@ except Exception as e:
 user_data = {}
 
 # Per-user semaphore to limit concurrent checks for each user
-USER_SEMAPHORE_LIMIT = 10  # Limit concurrent checks per user
+USER_SEMAPHORE_LIMIT = 3  # Limit concurrent checks per user
 
 # Proxy management
 class ProxyManager:
