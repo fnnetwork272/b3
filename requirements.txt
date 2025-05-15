@@ -9,3 +9,5 @@ pycountry
 python-telegram-bot
 beautifulsoup4
 nest_asyncio
+motor
+user_agent
