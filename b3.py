@@ -25,7 +25,7 @@ users_collection = db['users']
 keys_collection = db['keys']
 
 # Bot token
-TOKEN = os.getenv('8009942983:AAFDljoftiyUk4D2bzzh1GWEroNWqMQNlLs')
+TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '8009942983:AAFDljoftiyUk4D2bzzh1GWEroNWqMQNlLs')
 OWNER_ID = 7593550190  # Replace with your Telegram ID
 
 # Proxy settings
