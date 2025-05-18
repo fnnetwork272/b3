@@ -1,4 +1,5 @@
 python-telegram-bot
+aiohttp
 colorama
 pymongo
 python-dateutil
