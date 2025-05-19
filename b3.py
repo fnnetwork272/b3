@@ -373,7 +373,7 @@ async def single_check(user_id, cc_details, update, context, is_bulk, bulk_id):
                f"[⌬]𝗣𝗿𝗼𝘅𝘆 -» {result['proxy_status']}\n"
                f"[⌬]𝗖𝗵𝐞𝐜𝐤𝐞𝐝 𝐁𝐲 -» {checked_by} {tier}\n"
                f"[み]𝗕𝗼𝘁 -» <a href='tg://user?id=8009942983'>𝙁𝙉 𝘽3 𝘼𝙐𝙏𝙃</a>")
-        if '2010: Card Issuer Declined CVV' in result['message']:
+        if 'cvv: Gateway Rejected: cvv' in result['message']:
             msg = msg.replace("𝐃𝐞𝐜𝐥𝐢𝐧𝐞𝐝 ❌", "𝐂𝐂𝐍 ✅")
         await update.message.reply_text(msg, parse_mode='HTML')
 
