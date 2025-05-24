@@ -53,7 +53,7 @@ bulk_progress = {}  # Track bulk check progress
 stop_checking = {}  # Track stop requests per user
 COOLDOWN_SECONDS = 70
 MAX_CONCURRENT_PER_USER = 3
-MAX_CONCURRENT_SINGLE = 3
+MAX_CONCURRENT_SINGLE = 20
 
 async def get_user(user_id):
     user = await users_collection.find_one({'user_id': user_id})
