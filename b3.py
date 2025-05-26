@@ -352,7 +352,7 @@ async def single_check(user_id, cc_details, update, context, is_bulk, bulk_id):
     if checking_msg:
         await checking_msg.delete()
 
-    card_info = f"{result['card_type']} {{ {result['card_level']} }} {{ {result['card_type_category']} }}"
+    card_info = f"{result['card_type']} - {result['card_level']} - {result['card_type_category']}"
     issuer = result['issuer']
     country_display = f"{result['country_name']} {result['country_flag']}" if result['country_flag'] else result['country_name']
     checked_by = f"<a href='tg://user?id={user_id}'>{user_id}</a>"
