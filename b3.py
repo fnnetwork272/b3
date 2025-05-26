@@ -631,7 +631,7 @@ async def button_callback(update: Update, context):
                 task.cancel()
             user_active_tasks[user_id].clear()
             if user_id in user_cooldowns:
-                del user_cooldowns[user_id]]
+                del user_cooldowns[user_id]
             await query.message.reply_text("Checking Stopped 🔴")
 
 async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
