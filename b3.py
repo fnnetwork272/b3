@@ -41,7 +41,7 @@ except Exception as e:
     raise
 
 # Bot configuration
-BOT_TOKEN = "7748515975:AAHyGpFl4HXLLud45VS4v4vMkLfOiA6YNSs"
+BOT_TOKEN = "8009942983:AAGCC4oPE1XBfclabG4Zm7s4OCBYv_-gf-s"
 OWNER_ID = 7593550190
 CHECKING_LIMITS = {"Gold": 500, "Platinum": 1000, "Owner": 3000}
 CONCURRENT_REQUESTS = 3
