@@ -41,7 +41,7 @@ except Exception as e:
     raise
 
 # Bot configuration
-BOT_TOKEN = "8009942983:AAGCC4oPE1XBfclabG4Zm7s4OCBYv_-gf-s"
+BOT_TOKEN = "7748515975:AAHyGpFl4HXLLud45VS4v4vMkLfOiA6YNSs"
 OWNER_ID = 7593550190
 CHECKING_LIMITS = {"Gold": 500, "Platinum": 1000, "Owner": 3000}
 CONCURRENT_REQUESTS = 3
@@ -250,7 +250,17 @@ async def check_cc(cx: str, user_id: int, tier: str) -> dict:
                 "issuer": "Unknown",
                 "country": "Unknown"
             })
-            proxy_status = proxy if proxy else "None"
+            # Extract IP and port from proxy URL
+            proxy_status = "None"
+            if proxy:
+                try:
+                    proxy_parts = proxy.split("@")
+                    if len(proxy_parts) > 1:
+                        proxy_status = f"http://{proxy_parts[1]}xxx LIVE ✅"
+                    else:
+                        proxy_status = f"{proxy}xxx LIVE ✅"
+                except:
+                    proxy_status = "Invalid proxy format"
 
             result = {
                 "message": msg,
@@ -261,12 +271,20 @@ async def check_cc(cx: str, user_id: int, tier: str) -> dict:
                 "card_info": f"{card_details['brand']} - {card_details['type']} - {card_details['card_type']}"
             }
 
-            if "Gateway Rejected: avs" in msg:
-                status = "Declined ❌"
+            # Improved status determination
+            if "Gateway Rejected" in msg:
+                if "avs" in msg:
+                    status = "Declined ❌"
+                elif "risk_threshold" in msg:
+                    status = "Declined ❌"
+                else:
+                    status = "Declined ❌"
             elif "2010: Card Issuer Declined CVV" in msg:
                 status = "CCN ✅"
-            else:
+            elif "Payment method successfully added" in msg:
                 status = "Approved ✅"
+            else:
+                status = "Declined ❌"
 
             return {
                 "status": status,
@@ -455,7 +473,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
 [✪] 𝐓𝐨𝐭𝐚𝐥: {progress['total']}
 [✪] 𝐃𝐮𝐫𝐚𝘁𝗶𝗼𝗻: {total_time:.2f} seconds
 [✪] 𝐀𝐯𝐠 𝐒𝐩𝐞𝐞𝐝: {avg_speed:.2f} cards/sec
-[✪] 𝐒𝐮𝗰𝗰𝗲𝘀𝘀 𝐑𝗮𝘁𝗲: {success_rate:.2f}%
+[✪] 𝐒𝐮𝗰𝗰𝗲𝘀𝘀 𝐑𝐚𝘁𝗲: {success_rate:.2f}%
 ━━━━━━━━━━━━━━━━━━━━━━
 [み] 𝐃𝐞𝐯: <a href='tg://user?id=7593550190'>𓆰𝅃꯭᳚⚡!! ⏤‌𝐅ɴ x 𝐄ʟᴇᴄᴛʀᴀ𓆪𓆪⏤‌➤⃟🔥✘ </a>"""
     )
