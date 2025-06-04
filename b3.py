@@ -30,7 +30,7 @@ TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '8009942983:AAFmR3uuFuCw8_mY5ucOgVA-MQGN
 OWNER_ID = 7593550190  # Replace with your Telegram ID
 
 # Proxy settings
-PROXY = False
+PROXY = True
 try:
     with open('proxies.txt', 'r') as f:
         PROXY_LIST = [line.strip() for line in f.readlines() if line.strip()]
@@ -53,7 +53,7 @@ bulk_progress = {}  # Track bulk check progress
 stop_checking = {}  # Track stop requests per user
 COOLDOWN_SECONDS = 70
 MAX_CONCURRENT_PER_USER = 3
-MAX_CONCURRENT_SINGLE = 3
+MAX_CONCURRENT_SINGLE = 25
 
 async def get_user(user_id):
     user = await users_collection.find_one({'user_id': user_id})
