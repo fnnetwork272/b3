@@ -41,7 +41,7 @@ except Exception as e:
     raise
 
 # Bot configuration
-BOT_TOKEN = "7748515975:AAHyGpFl4HXLLud45VS4v4vMkLfOiA6YNSs"  # Replace with your Telegram bot token
+BOT_TOKEN = "8009942983:AAFmR3uuFuCw8_mY5ucOgVA-MQGNFMYGV30"  # Replace with your Telegram bot token
 OWNER_ID = 7593550190  # Replace with your Telegram user ID
 PROXY = False  # Set to True to enable proxy
 PROXY_URL = "http://user:pass@proxy:port"  # Replace with your proxy URL
