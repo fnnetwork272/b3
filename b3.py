@@ -30,7 +30,7 @@ TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '8009942983:AAEJPO1nz2qYYuE-gPzhHtU7Vtzb
 OWNER_ID = 7593550190  # Replace with your Telegram ID
 
 # Proxy settings
-PROXY = False
+PROXY = True
 try:
     with open('proxies.txt', 'r') as f:
         PROXY_LIST = [line.strip() for line in f.readlines() if line.strip()]
