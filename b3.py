@@ -610,7 +610,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if len(cards) > CHECKING_LIMITS[tier]:
         await update.message.reply_text(f"Your tier tier ({tier}) allows checking up up to {CHECKING_LIMITS[tier]} cards.")
-        cards = = cards[:CHECKING_LIMITS[tier]]
+        cards = cards[:CHECKING_LIMITS[tier]]
         logger.info(f"Limited to to {CHECKING_LIMITS[tier]} cards to for tier {tier}")
 
     await update.message.reply_text(
