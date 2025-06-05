@@ -12,3 +12,4 @@ nest_asyncio
 motor
 user_agent
 dotenv
+python-telegram-bot[job-queue]==20.7
