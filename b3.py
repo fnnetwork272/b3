@@ -603,9 +603,9 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"200 OK: Limited to {CHECKING_LIMITS[tier]} CCs for tier {tier}")
 
     await update.message.reply_text(
-        f"""✅ 𝐅𝐢𝐥𝐞 𝐑𝐞𝐜𝐞𝐢𝐯𝐞𝐝! 𝐒𝐭𝐚𝐫𝐭𝐢𝐧𝐠 𝐂𝐡𝐞𝐜𝐤𝐢𝐧𝐠...
+        """✅ 𝐅𝐢𝐥𝐞 𝐑𝐞𝐜𝐞𝐢𝐯𝐞𝐝! 𝐒𝐭𝐚𝐫𝐭𝐢𝐧𝐠 𝐂𝐡𝐞𝐜𝐤𝐢𝐧𝐠...
 
-⚡ 𝐒𝐩𝐞𝐞𝐝: 𝐏𝐫𝐨𝐠𝐫𝐞𝐬𝐬 𝐖𝐢𝐥𝐥 𝐁𝐞 𝐔𝐩𝐝𝐚�{t𝐞𝐝 𝐖𝐡𝐞𝐧 50 𝐜𝐚𝐫𝐝𝐬/𝐬𝐞�{c"""
+⚡ 𝐒𝐩𝐞𝐞𝐝: 𝐏𝐫𝐨𝐠𝐫𝐞𝐬𝐬 𝐖𝐢𝐥𝐥 𝐁𝐞 𝐔𝐩𝐝𝐚𝐭𝐞𝐝 𝐖𝐡𝐞𝐧 50 𝐜𝐚𝐫𝐝𝐬/𝐬𝐞𝐜"""
     )
     logger.info("200 OK: File received for checking")
 
@@ -703,10 +703,10 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     summary = (
         f"""[⌬] 𝐅𝐍 𝐂𝐇𝐄𝐂𝐊𝐄𝐑 𝐇𝐈𝐓𝐒 😈⚡
 ━━━━━━━━━━━━━━━━━━━━━━
-[✪] 𝐀𝐩𝐩𝐫𝐨𝐯𝐞𝐝: {progress['accepted']}
-[❌] 𝐃𝐞𝐜𝐥𝗶𝐧𝐞𝐝: {progress['rejected']}
-[✪] 𝐂𝐡𝐞𝐜𝐤𝐞𝐝: {cards_checked}/{total_cards}
-[∑] 𝐓𝐨𝐭𝐚𝐥: {total_cards}
+[✪] 𝐀𝐩𝐩𝐫𝐨𝐯𝐞𝐝: {progress['approved']}
+[❌] 𝐃𝐞𝐜𝐥𝐢𝐧𝐞𝐝: {progress['declined']}
+[✪] 𝐂𝐂𝐍: {progress['ccn']}
+[✪] 𝐂𝐡𝐞𝐜𝐤𝐞𝐝: {progress['checked']}/{progress['total']}
 ━━━━━━━━━━━━━━━━━━━━━━
 [⏱] 𝐃𝐮𝐫𝐚𝐭𝐢𝐨𝐧: {total_time:.2f} seconds
 [⚡] 𝐀𝐯𝐠 𝐒𝐩𝐞𝐞𝐝: {avg_speed:.2f} cards/sec
