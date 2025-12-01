@@ -576,19 +576,24 @@ async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
     await update.message.reply_text("Broadcast sent to all users.")
 
-def main():
-    application = Application.builder().token(TOKEN).build()
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("stop", stop))
-    application.add_handler(CommandHandler("chk", chk))
-    application.add_handler(CommandHandler("genkey", genkey))
-    application.add_handler(CommandHandler("redeem", redeem))
-    application.add_handler(CommandHandler("delkey", delkey))
-    application.add_handler(CommandHandler("broadcast", broadcast))
-    application.add_handler(MessageHandler(filters.Document.ALL, handle_file))
-    application.add_handler(CallbackQueryHandler(button_callback))
-    asyncio.ensure_future(process_checks())
-    application.run_polling()
+async def main():
+    app = Application.builder().token(TOKEN).concurrent_updates(True).build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("stop", stop))
+    app.add_handler(CommandHandler("chk", chk))
+    app.add_handler(CommandHandler("genkey", genkey))
+    app.add_handler(CommandHandler("redeem", redeem))
+    app.add_handler(CommandHandler("delkey", delkey))
+    app.add_handler(CommandHandler("broadcast", broadcast))
+    app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
+    app.add_handler(CallbackQueryHandler(button_callback))
+
+    # Start the background checker
+    app.create_task(process_checks())
+    print("FN B3 Checker Started | Background task running...")
+
+    await app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
