@@ -286,6 +286,8 @@ async def delkey(update: Update, context):
 # ===================== MAIN =====================
 def main():
     app = Application.builder().token(TOKEN).build()
+    
+    # Sab handlers add karne ke baad
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("chk", chk))
     app.add_handler(CommandHandler("genkey", genkey))
@@ -293,9 +295,9 @@ def main():
     app.add_handler(CommandHandler("delkey", delkey))
     app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
     app.add_handler(CallbackQueryHandler(button))
-    asyncio.create_task(process_queue())
-    print("FN B3 AUTH – PLEX.TV GATEWAY 100% LIVE & RUNNING")
-    app.run_polling()
 
-if __name__ == '__main__':
-    main()
+    # Yeh line add kar de (yeh background queue chalayega)
+    app.job_queue.run_once(lambda ctx: asyncio.create_task(process_queue()), 1)
+
+    print("FN B3 AUTH – PLEX.TV LIVE & RUNNING")
+    app.run_polling()
