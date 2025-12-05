@@ -2,44 +2,6 @@
 
 #RazorPay Charge 1$ Code And All Captured By @diwazz 
 
-import requests
-
-headers = {
-    'Accept': '*/*',
-    'Accept-Language': 'en-IN',
-    'Connection': 'keep-alive',
-    'Content-type': 'application/x-www-form-urlencoded',
-    'Referer': 'https://api.razorpay.com/v1/checkout/public?traffic_env=production&build=ef9764309f65a1e8295cdadd332e1da6b3c0adbc&build_v1=cb2fc10e95cbac52b796c4f30abcfd48da438eef&checkout_v2=1&new_session=1&rzp_device_id=1.43d6daced12b197df96fe752f0d504569d483c35.1764923278911.61815454&unified_session_id=RnrdHfdyAgXHoY&session_token=4240A937FCD1249169B399AFA2BA971DBB99A6E11A22EBE67D2140758AC0135003EC71458E2891B441F23843AD46E1C4069522FDF0B03DB495D71FA2091A3AA14B0B6D9961695475E50B1335D3AD042EA1A60132230DA3A9422DDD5CBB1461E4F774EB5B9028DC81',
-    'Sec-Fetch-Dest': 'empty',
-    'Sec-Fetch-Mode': 'cors',
-    'Sec-Fetch-Site': 'same-origin',
-    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36',
-    'sec-ch-ua': '"Chromium";v="127", "Not)A;Brand";v="99", "Microsoft Edge Simulate";v="127", "Lemur";v="127"',
-    'sec-ch-ua-mobile': '?1',
-    'sec-ch-ua-platform': '"Android"',
-    'x-session-token': '4240A937FCD1249169B399AFA2BA971DBB99A6E11A22EBE67D2140758AC0135003EC71458E2891B441F23843AD46E1C4069522FDF0B03DB495D71FA2091A3AA14B0B6D9961695475E50B1335D3AD042EA1A60132230DA3A9422DDD5CBB1461E4F774EB5B9028DC81',
-}
-
-params = {
-    'key_id': 'rzp_live_RjYQK2vibEihg9',
-    'session_token': '4240A937FCD1249169B399AFA2BA971DBB99A6E11A22EBE67D2140758AC0135003EC71458E2891B441F23843AD46E1C4069522FDF0B03DB495D71FA2091A3AA14B0B6D9961695475E50B1335D3AD042EA1A60132230DA3A9422DDD5CBB1461E4F774EB5B9028DC81',
-    'keyless_header': 'api_v1:TyDZd53Wsad4qkUjkwQC3f6CBdTmzv23wK6qSlYuISSnuVpZ8X4d1Ff0K1fCacr4tBMExDlZS7jVvlJvEVYBXpAb4yaAFw==',
-}
-
-response = requests.get(
-    'https://api.razorpay.com/v1/standard_checkout/payments/pay_RSuSWtlnJmOUPP/cancel',
-    params=params,
-    headers=headers,
-)
-print('Gettting Result ' )
-print(response.text)
-print('succesfully create order id , pay id , iim id ')
-print('now we create final sesssion ')
-print('createing session token ')
-print('session token found ')
-print('Now Final Status ')
-print('auth done ')
-
 
 import requests
 
