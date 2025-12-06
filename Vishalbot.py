@@ -10,7 +10,7 @@ from colorama import Fore, init
 init(autoreset=True)
 
 # Telegram Bot Token
-TELEGRAM_BOT_TOKEN = "7785214559:AAFRnAdYXMjfT-6c2R1Ku50V4DjZFwsP_sc"
+TELEGRAM_BOT_TOKEN = "8009942983:AAE_sn8PdZ6ekBis3PMyBpv9Vyo0cP24b_c"
 
 # Logging
 logging.basicConfig(
