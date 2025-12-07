@@ -119,7 +119,7 @@ def check_card(cc, mm, yy, cvv, email=None):
         "action": "wpsd_donation",
         "name": "Vip op",
         "email": email,
-        "amount": "5",
+        "amount": "1",
         "donation_for": "Harlem STEM Up!",
         "currency": "USD",
         "idempotency": idempotency,
