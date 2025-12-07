@@ -40,7 +40,7 @@ def check_card(cc, mm, yy, cvv, email=None):
         
     session = requests.Session()
     
-    PROXY = "http://vQ6cAyNPZyA9Vua5:iGrCOq9dS9zQa9Ct@geo.g-w.info:10080"
+    PROXY = "http://PP_N13R1TOI8V-country-US-state-Florida-city-Clermont:u4jqpkkw@pro.porterproxies.com:62345"
 
     session.proxies = {
         "http": PROXY,
