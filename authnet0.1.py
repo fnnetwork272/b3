@@ -126,9 +126,9 @@ def submit_payment_form(opaque_token):
         print("Raw Response (first 300):\n", response.text[:300])
 
 # === RUN ===
-card = "424224242424242"
-exp = "1029"
-cvv = "701"
+card = "5384046374790200"
+exp = "0630"
+cvv = "936"
 
 token = generate_token(card, exp, cvv)
 if token:
